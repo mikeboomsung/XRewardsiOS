@@ -15,6 +15,7 @@
 		703A4D792FE2464600B2B4A8 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 703A4D782FE2464600B2B4A8 /* FirebaseFirestore */; };
 		703A4D7B2FE2464600B2B4A8 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 703A4D7A2FE2464600B2B4A8 /* FirebaseFunctions */; };
 		703A4D7D2FE2464600B2B4A8 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 703A4D7C2FE2464600B2B4A8 /* FirebaseMessaging */; };
+		703B01012FE3100000B2B4A8 /* AdventureAuthUI in Frameworks */ = {isa = PBXBuildFile; productRef = 703B01032FE3100000B2B4A8 /* AdventureAuthUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 				703A4D752FE2464600B2B4A8 /* FirebaseCore in Frameworks */,
 				703A4D6E2FE2458100B2B4A8 /* GoogleSignIn in Frameworks */,
 				703A4D792FE2464600B2B4A8 /* FirebaseFirestore in Frameworks */,
+				703B01012FE3100000B2B4A8 /* AdventureAuthUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +94,7 @@
 				703A4D782FE2464600B2B4A8 /* FirebaseFirestore */,
 				703A4D7A2FE2464600B2B4A8 /* FirebaseFunctions */,
 				703A4D7C2FE2464600B2B4A8 /* FirebaseMessaging */,
+				703B01032FE3100000B2B4A8 /* AdventureAuthUI */,
 			);
 			productName = XRewards;
 			productReference = 705FCEEB2FE219E50015B00C /* XRewards.app */;
@@ -124,6 +127,7 @@
 			packageReferences = (
 				703A4D6C2FE2458100B2B4A8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				703A4D6F2FE2464600B2B4A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				703B01022FE3100000B2B4A8 /* XCLocalSwiftPackageReference "../../KidsAdventure/adventure-platform-monorepo/ios-packages/AdventureAuthUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 705FCEEC2FE219E50015B00C /* Products */;
@@ -282,19 +286,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = XS89J2Z82F;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = NO;
-				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = NO;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Supporting/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vaiholding.XRewards;
@@ -321,19 +314,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = XS89J2Z82F;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = NO;
-				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = NO;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Supporting/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vaiholding.XRewards;
@@ -372,6 +354,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		703B01022FE3100000B2B4A8 /* XCLocalSwiftPackageReference "../../KidsAdventure/adventure-platform-monorepo/ios-packages/AdventureAuthUI" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../../KidsAdventure/adventure-platform-monorepo/ios-packages/AdventureAuthUI";
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
 		703A4D6C2FE2458100B2B4A8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
@@ -432,6 +421,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 703A4D6F2FE2464600B2B4A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		703B01032FE3100000B2B4A8 /* AdventureAuthUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 703B01022FE3100000B2B4A8 /* XCLocalSwiftPackageReference "../../KidsAdventure/adventure-platform-monorepo/ios-packages/AdventureAuthUI" */;
+			productName = AdventureAuthUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,7 +1,10 @@
+import AdventureServices
 import SwiftUI
 
 struct ProfileView: View {
     @Environment(RewardsStore.self) private var store
+    @StateObject private var authService = AuthenticationService.shared
+    @State private var isSigningOut = false
 
     var body: some View {
         NavigationStack {
@@ -23,6 +26,11 @@ struct ProfileView: View {
                                 Text("Member since \(profile.memberSince.mediumDate)")
                                     .font(.caption)
                                     .foregroundStyle(Theme.textSecondary)
+                                if store.usesLiveData {
+                                    Text("Live account")
+                                        .font(.caption2)
+                                        .foregroundStyle(Theme.success)
+                                }
                             }
                         }
                         .padding(.vertical, 8)
@@ -71,15 +79,18 @@ struct ProfileView: View {
                     .listRowBackground(Theme.backgroundCard)
                     .opacity(0.6)
 
-                    HStack {
-                        Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
-                        Spacer()
-                        Text("Phase 3")
-                            .font(.caption)
-                            .foregroundStyle(Theme.textSecondary)
+                    Button {
+                        Task { await signOut() }
+                    } label: {
+                        HStack {
+                            Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                            Spacer()
+                            if isSigningOut {
+                                ProgressView()
+                            }
+                        }
                     }
                     .listRowBackground(Theme.backgroundCard)
-                    .opacity(0.6)
                 }
             }
             .scrollContentBackground(.hidden)
@@ -87,6 +98,12 @@ struct ProfileView: View {
             .screenBackground()
             .navigationTitle("Profile")
         }
+    }
+
+    private func signOut() async {
+        isSigningOut = true
+        defer { isSigningOut = false }
+        try? await authService.signOut()
     }
 }
 

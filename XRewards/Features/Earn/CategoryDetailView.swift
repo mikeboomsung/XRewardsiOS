@@ -1,7 +1,12 @@
+import AdventureServices
 import SwiftUI
 
 struct CategoryDetailView: View {
     let category: RevenueCategory
+
+    @StateObject private var authService = AuthenticationService.shared
+    @State private var showReferralForm = false
+    @Environment(RewardsStore.self) private var store
 
     var body: some View {
         ScrollView {
@@ -43,10 +48,12 @@ struct CategoryDetailView: View {
                     .clipShape(RoundedRectangle(cornerRadius: Theme.tileCornerRadius))
                 }
 
-                PrimaryButton(title: "Start Earning") {}
-                    .padding(.top, 8)
+                PrimaryButton(title: "Start Earning") {
+                    showReferralForm = true
+                }
+                .padding(.top, 8)
 
-                Text("Referral flows coming in a future update.")
+                Text("Submit invitee details to earn 10 referral points.")
                     .font(.caption)
                     .foregroundStyle(Theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -56,11 +63,19 @@ struct CategoryDetailView: View {
         .screenBackground()
         .navigationTitle(category.displayName)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showReferralForm) {
+            ReferralSubmissionView(category: category) {
+                Task {
+                    await store.refreshAfterReferral(isAuthenticated: authService.isAuthenticated)
+                }
+            }
+        }
     }
 }
 
 #Preview {
     NavigationStack {
         CategoryDetailView(category: .insurance)
+            .environment(RewardsStore())
     }
 }

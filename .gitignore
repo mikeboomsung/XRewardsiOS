@@ -11,3 +11,13 @@ xcuserdata/
 # Secrets
 Config.xcconfig
 *.p8
+
+# XRewardsWeb (admin dashboard)
+XRewardsWeb/node_modules/
+XRewardsWeb/dist/
+XRewardsWeb/.env
+XRewardsWeb/.env.local
+XRewardsWeb/tsconfig.tsbuildinfo
+
+# Firebase local deploy cache
+.firebase/

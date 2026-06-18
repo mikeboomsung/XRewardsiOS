@@ -9,17 +9,23 @@ final class RewardsStore {
     var dividends: [DividendPeriod] = []
     var currentDividend: DividendPeriod?
     var team: TeamSummary?
+    var referrals: [ReferralRecord] = []
     var isLoading = false
+    var usesLiveData = false
 
-    private let service: RewardsService
+    private let liveService = LiveRewardsService()
+    private let mockService = MockRewardsService()
 
-    init(service: RewardsService = MockRewardsService()) {
-        self.service = service
-    }
-
-    func load() async {
+    func load(isAuthenticated: Bool) async {
         isLoading = true
+        usesLiveData = isAuthenticated
         defer { isLoading = false }
+
+        let service: any RewardsService = isAuthenticated ? liveService : mockService
+
+        if isAuthenticated {
+            await liveService.refresh()
+        }
 
         async let profileTask = service.fetchProfile()
         async let dashboardTask = service.fetchDashboard()
@@ -34,5 +40,11 @@ final class RewardsStore {
         dividends = await dividendsTask
         currentDividend = await currentDividendTask
         team = await teamTask
+        referrals = isAuthenticated ? await liveService.fetchReferrals() : []
+    }
+
+    func refreshAfterReferral(isAuthenticated: Bool) async {
+        guard isAuthenticated else { return }
+        await load(isAuthenticated: true)
     }
 }

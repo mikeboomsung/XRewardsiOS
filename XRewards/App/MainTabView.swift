@@ -1,7 +1,9 @@
+import AdventureServices
 import SwiftUI
 
 struct MainTabView: View {
     @State private var store = RewardsStore()
+    @StateObject private var authService = AuthenticationService.shared
 
     var body: some View {
         TabView {
@@ -22,7 +24,9 @@ struct MainTabView: View {
         }
         .tint(Theme.accentGold)
         .environment(store)
-        .task { await store.load() }
+        .task(id: authService.isAuthenticated) {
+            await store.load(isAuthenticated: authService.isAuthenticated)
+        }
     }
 }
 

@@ -4,10 +4,11 @@ import FirebaseCore
 enum FirebaseBootstrap {
     /// Configures Firebase and App Check before any other Firebase SDK is used.
     ///
-    /// - **Simulator:** debug provider — copy the debug token from Xcode console into Firebase Console.
-    /// - **Physical iPhone (Debug & Release):** App Attest — registers automatically after first run.
+    /// Production / release posture:
+    /// - **Physical iPhone:** App Attest (matches `appattest-environment` = production in entitlements)
+    /// - **Simulator (Debug only):** debug provider — register the printed token in Firebase Console → App Check
     static func configure() {
-        #if targetEnvironment(simulator)
+        #if targetEnvironment(simulator) && DEBUG
         AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
         #else
         AppCheck.setAppCheckProviderFactory(AppAttestProviderFactory())
