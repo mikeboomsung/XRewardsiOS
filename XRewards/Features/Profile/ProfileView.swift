@@ -2,13 +2,20 @@ import AdventureServices
 import SwiftUI
 
 struct ProfileView: View {
+    @AppStorage(AppUILanguage.storageKey) private var uiLanguage = AppUILanguage.default.rawValue
     @Environment(RewardsStore.self) private var store
     @StateObject private var authService = AuthenticationService.shared
+    @StateObject private var session = XRewardsSession.shared
     @State private var isSigningOut = false
     @State private var isEditingName = false
     @State private var editedName = ""
     @State private var isSavingName = false
     @State private var nameError: String?
+    @State private var showDeleteConfirm = false
+    @State private var isDeletingAccount = false
+    @State private var deleteError: String?
+
+    private var lang: AppUILanguage { uiLanguage.appLanguage }
 
     var body: some View {
         NavigationStack {
@@ -24,76 +31,117 @@ struct ProfileView: View {
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Theme.textPrimary)
-                                Text("ID: \(profile.memberID)")
+                                if session.isGuest {
+                                    Text(L10n.guestAccountLabel(lang: lang))
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.pending)
+                                }
+                                Text(L10n.memberIDLabel(profile.memberID, lang: lang))
                                     .font(.caption)
                                     .foregroundStyle(Theme.textSecondary)
-                                Text("Member since \(profile.memberSince.mediumDate)")
-                                    .font(.caption)
-                                    .foregroundStyle(Theme.textSecondary)
+                                if !session.isGuest {
+                                    Text(L10n.memberSince(profile.memberSince.mediumDate, lang: lang))
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.textSecondary)
+                                }
                             }
                         }
                         .padding(.vertical, 8)
                         .listRowBackground(Theme.backgroundCard)
 
-                        if store.usesLiveData {
+                        if store.usesLiveData, !session.isGuest {
                             Button {
                                 editedName = profile.name == "Member" ? "" : profile.name
                                 nameError = nil
                                 isEditingName = true
                             } label: {
-                                Label("Edit Name", systemImage: "pencil")
+                                Label(L10n.editName(lang: lang), systemImage: "pencil")
+                            }
+                            .listRowBackground(Theme.backgroundCard)
+                        }
+
+                        if session.isGuest {
+                            Button {
+                                Task { await signOut() }
+                            } label: {
+                                Label(L10n.signInToEarn(lang: lang), systemImage: "person.badge.key.fill")
                             }
                             .listRowBackground(Theme.backgroundCard)
                         }
                     }
                 }
 
-                Section("Learn") {
+                Section(L10n.learn(lang: lang)) {
                     NavigationLink {
                         HowItWorksView()
                     } label: {
-                        Label("How It Works", systemImage: "lightbulb.fill")
+                        Label(L10n.howItWorks(lang: lang), systemImage: "lightbulb.fill")
                     }
                     .listRowBackground(Theme.backgroundCard)
 
                     NavigationLink {
                         DividendsView()
                     } label: {
-                        Label("Dividends", systemImage: "banknote.fill")
+                        Label(L10n.dividends(lang: lang), systemImage: "banknote.fill")
                     }
                     .listRowBackground(Theme.backgroundCard)
                 }
 
-                Section("Support") {
-                    Link(destination: URL(string: "https://xrewards.app/rules")!) {
-                        Label("Reward Rules", systemImage: "doc.text.fill")
+                Section(L10n.support(lang: lang)) {
+                    NavigationLink {
+                        XRewardsPrivacyPolicyReadView()
+                    } label: {
+                        Label(L10n.privacyPolicy(lang: lang), systemImage: "hand.raised.fill")
                     }
                     .listRowBackground(Theme.backgroundCard)
-                    Link(destination: URL(string: "https://xrewards.app/faq")!) {
-                        Label("FAQ", systemImage: "questionmark.circle.fill")
+
+                    Link(destination: URL(string: supportURL(path: "rules"))!) {
+                        Label(L10n.rewardRules(lang: lang), systemImage: "doc.text.fill")
                     }
                     .listRowBackground(Theme.backgroundCard)
-                    Link(destination: URL(string: "mailto:support@xrewards.app")!) {
-                        Label("Contact Support", systemImage: "envelope.fill")
+                    Link(destination: URL(string: supportURL(path: "faq"))!) {
+                        Label(L10n.faq(lang: lang), systemImage: "questionmark.circle.fill")
+                    }
+                    .listRowBackground(Theme.backgroundCard)
+                    Link(destination: URL(string: supportURL(path: "contact"))!) {
+                        Label(L10n.contactSupport(lang: lang), systemImage: "envelope.fill")
                     }
                     .listRowBackground(Theme.backgroundCard)
                 }
 
-                Section("Settings") {
+                Section(L10n.settings(lang: lang)) {
                     HStack {
-                        Label("Language", systemImage: "globe")
+                        Label(L10n.language(lang: lang), systemImage: "globe")
                         Spacer()
-                        Text("English")
-                            .foregroundStyle(Theme.textSecondary)
+                        CurrentLanguageLabel()
+                        LanguageToggleButton()
                     }
                     .listRowBackground(Theme.backgroundCard)
-                    .opacity(0.6)
+
+                    if session.isMember {
+                        Button(role: .destructive) {
+                            showDeleteConfirm = true
+                        } label: {
+                            HStack {
+                                Label(L10n.deleteAccount(lang: lang), systemImage: "trash.fill")
+                                Spacer()
+                                if isDeletingAccount {
+                                    ProgressView()
+                                }
+                            }
+                        }
+                        .disabled(isDeletingAccount || authService.isLoading)
+                        .listRowBackground(Theme.backgroundCard)
+                    }
 
                     Button {
                         Task { await signOut() }
                     } label: {
                         HStack {
-                            Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                            Label(
+                                session.isGuest ? L10n.exitGuest(lang: lang) : L10n.signOut(lang: lang),
+                                systemImage: "rectangle.portrait.and.arrow.right"
+                            )
                             Spacer()
                             if isSigningOut {
                                 ProgressView()
@@ -106,9 +154,35 @@ struct ProfileView: View {
             .scrollContentBackground(.hidden)
             .foregroundStyle(Theme.textPrimary)
             .screenBackground()
-            .navigationTitle("Profile")
+            .navigationTitle(L10n.profile(lang: lang))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    LanguageToggleButton()
+                }
+            }
             .sheet(isPresented: $isEditingName) {
                 editNameSheet
+            }
+            .alert(L10n.deleteAccountTitle(lang: lang), isPresented: $showDeleteConfirm) {
+                Button(L10n.cancel(lang: lang), role: .cancel) {}
+                Button(L10n.delete(lang: lang), role: .destructive) {
+                    Task { await deleteAccount() }
+                }
+            } message: {
+                Text(L10n.deleteAccountMessage(lang: lang))
+            }
+            .alert(L10n.deleteAccount(lang: lang), isPresented: Binding(
+                get: { deleteError != nil },
+                set: { if !$0 { deleteError = nil } }
+            )) {
+                Button(L10n.ok(lang: lang)) { deleteError = nil }
+            } message: {
+                Text(deleteError ?? "")
+            }
+            .onChange(of: uiLanguage) { _, _ in
+                if session.isGuest {
+                    Task { await store.loadGuestPreview(language: lang) }
+                }
             }
         }
     }
@@ -116,8 +190,8 @@ struct ProfileView: View {
     private var editNameSheet: some View {
         NavigationStack {
             Form {
-                Section("Display name") {
-                    TextField("Your name", text: $editedName)
+                Section(L10n.displayName(lang: lang)) {
+                    TextField(L10n.yourName(lang: lang), text: $editedName)
                         .textInputAutocapitalization(.words)
                         .autocorrectionDisabled()
                 }
@@ -130,14 +204,14 @@ struct ProfileView: View {
                     }
                 }
             }
-            .navigationTitle("Edit Name")
+            .navigationTitle(L10n.editName(lang: lang))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { isEditingName = false }
+                    Button(L10n.cancel(lang: lang)) { isEditingName = false }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button(L10n.save(lang: lang)) {
                         Task { await saveName() }
                     }
                     .disabled(isSavingName || editedName.trimmingCharacters(in: .whitespacesAndNewlines).count < 2)
@@ -154,16 +228,36 @@ struct ProfileView: View {
 
         do {
             _ = try await ProfileService.shared.updateDisplayName(editedName)
-            await store.load(isAuthenticated: authService.isAuthenticated)
+            await store.loadMember()
             isEditingName = false
         } catch {
             nameError = error.localizedDescription
         }
     }
 
+    private func deleteAccount() async {
+        isDeletingAccount = true
+        deleteError = nil
+        defer { isDeletingAccount = false }
+
+        do {
+            store.clear()
+            try await authService.deleteAccount()
+            XRewardsSession.shared.refresh()
+        } catch {
+            deleteError = error.localizedDescription
+        }
+    }
+
+    private func supportURL(path: String) -> String {
+        let page = lang == .zh ? "support.html" : "support-en.html"
+        return "https://xrewards.app/\(page)#\(path)"
+    }
+
     private func signOut() async {
         isSigningOut = true
         defer { isSigningOut = false }
+        store.clear()
         try? await authService.signOut()
     }
 }
@@ -171,4 +265,5 @@ struct ProfileView: View {
 #Preview {
     ProfileView()
         .environment(RewardsStore.preview())
+        .environment(\.appLanguage, .zh)
 }

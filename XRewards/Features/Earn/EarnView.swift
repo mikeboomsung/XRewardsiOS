@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct EarnView: View {
+    @Environment(\.appLanguage) private var lang
+
     private let columns = [
         GridItem(.flexible(), spacing: 12),
         GridItem(.flexible(), spacing: 12)
@@ -10,7 +12,7 @@ struct EarnView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Choose a revenue stream and start earning permanent points.")
+                    Text(L10n.earnSubtitle(lang: lang))
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
 
@@ -26,7 +28,7 @@ struct EarnView: View {
                 .padding(Theme.horizontalPadding)
             }
             .screenBackground()
-            .navigationTitle("Earn")
+            .navigationTitle(L10n.earnTitle(lang: lang))
             .navigationDestination(for: RevenueCategory.self) { category in
                 CategoryDetailView(category: category)
             }
@@ -36,4 +38,5 @@ struct EarnView: View {
 
 #Preview {
     EarnView()
+        .environment(\.appLanguage, .zh)
 }

@@ -19,8 +19,13 @@ struct XRewardsApp: App {
 }
 
 private struct XRewardsRootView: View {
+    @AppStorage(AppUILanguage.storageKey) private var uiLanguage = AppUILanguage.default.rawValue
     @StateObject private var authService: AuthenticationService
+    @StateObject private var session = XRewardsSession.shared
     @State private var isAppCheckReady = false
+    @State private var hasAcceptedPrivacyPolicy = PrivacyPolicyStorage.hasAccepted
+
+    private var lang: AppUILanguage { uiLanguage.appLanguage }
 
     init() {
         _authService = StateObject(wrappedValue: AuthenticationService.shared)
@@ -28,14 +33,20 @@ private struct XRewardsRootView: View {
 
     var body: some View {
         Group {
-            if !isAppCheckReady {
-                ProgressView("Preparing secure connection…")
-            } else if authService.isAuthenticated {
+            if !hasAcceptedPrivacyPolicy {
+                XRewardsPrivacyConsentView {
+                    hasAcceptedPrivacyPolicy = true
+                }
+            } else if !isAppCheckReady {
+                ProgressView(L10n.preparingConnection(lang: lang))
+            } else if session.canUseApp {
                 MainTabView()
             } else {
                 XRewardsAuthenticationView()
             }
         }
+        .id(uiLanguage)
+        .environment(\.appLanguage, lang)
         .preferredColorScheme(.dark)
         .onOpenURL { url in
             _ = GIDSignIn.sharedInstance.handle(url)
@@ -43,6 +54,10 @@ private struct XRewardsRootView: View {
         .task {
             await AppCheckWarmup.prepare()
             isAppCheckReady = true
+            session.refresh()
+        }
+        .onChange(of: authService.isAuthenticated) { _, _ in
+            session.refresh()
         }
     }
 }

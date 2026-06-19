@@ -126,6 +126,31 @@ final class MockRewardsService: RewardsService {
         TeamSummary(directMembers: 8, totalDownline: 34, teamPoints: 48_200)
     }
 
+    func fetchReferrals() async -> [ReferralRecord] {
+        [
+            ReferralRecord(
+                id: "preview-1",
+                inviteeName: "Jane Doe",
+                inviteePhone: "+1 555-0100",
+                inviteeEmail: "jane@example.com",
+                category: .insurance,
+                pointsAwarded: 10,
+                status: .pending,
+                createdAt: date(2026, 6, 12)
+            ),
+            ReferralRecord(
+                id: "preview-2",
+                inviteeName: "Bob Smith",
+                inviteePhone: "+1 555-0101",
+                inviteeEmail: "bob@example.com",
+                category: .loans,
+                pointsAwarded: 10,
+                status: .confirmed,
+                createdAt: date(2026, 6, 5)
+            ),
+        ]
+    }
+
     private func date(_ year: Int, _ month: Int, _ day: Int) -> Date {
         calendar.date(from: DateComponents(year: year, month: month, day: day)) ?? .now
     }

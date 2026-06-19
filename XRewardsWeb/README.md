@@ -1,11 +1,35 @@
-# XRewards Admin Dashboard
+# XRewards Web
 
-Web admin for `xrewards-c0524` — referrals inbox, member points, reward history, and conversion bonuses.
+Member portal + admin dashboard for `xrewards-c0524`.
 
 ## URLs
 
-- **Hosting:** https://xrewards-c0524.web.app (after deploy)
+- **Member app (default):** https://xrewards-c0524.web.app
+- **Admin dashboard:** https://xrewards-c0524.web.app/admin
 - **Firebase project:** `xrewards-c0524`
+
+## Member web app
+
+The website now mirrors the iOS member experience:
+
+| Tab | Features |
+|-----|----------|
+| **Home** | Points balance, dividend estimate, active revenue streams, guest preview banner |
+| **Earn** | All 6 revenue categories with point tables and referral submission |
+| **Activity** | Transaction history + referrals filter |
+| **Team** | Team stats, invite sheet |
+| **Profile** | Account, How It Works, Dividends, support links, language toggle |
+
+Also includes:
+
+- **Guest mode** — anonymous Firebase auth, mock preview data, cannot submit referrals
+- **Sign in / Sign up** — email/password + Google
+- **简体中文 / English** — default Simplified Chinese (same as iOS)
+- **Live data** — `getRewardsData`, `submitReferral`, `updateProfile` via Cloud Functions
+
+## Admin dashboard
+
+Moved to `/admin` (referrals inbox, member points, conversion bonuses).
 
 ## App Check (required for admin sign-in)
 

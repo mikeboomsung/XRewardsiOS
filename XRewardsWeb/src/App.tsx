@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from './firebase';
 import { checkAdminAccess } from './api/adminApi';
 import { Layout } from './components/Layout';
+import { LanguageProvider } from './i18n/LanguageProvider';
 import { LoginPage } from './pages/LoginPage';
 import { ReferralsPage } from './pages/ReferralsPage';
 import { UserDetailPage } from './pages/UserDetailPage';
 import { UsersPage } from './pages/UsersPage';
+import { MemberApp } from './pages/member/MemberApp';
 
-export default function App() {
+function AdminGate() {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -36,7 +38,11 @@ export default function App() {
   }, [user]);
 
   if (!ready) {
-    return <div className="login-page"><p className="muted">Loading…</p></div>;
+    return (
+      <div className="login-page">
+        <p className="muted">Loading…</p>
+      </div>
+    );
   }
 
   if (!user || !isAdmin) {
@@ -50,16 +56,25 @@ export default function App() {
     );
   }
 
+  return <Outlet />;
+}
+
+export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<ReferralsPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="users/:userId" element={<UserDetailPage />} />
+    <LanguageProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/admin" element={<AdminGate />}>
+            <Route element={<Layout />}>
+              <Route index element={<ReferralsPage />} />
+              <Route path="users" element={<UsersPage />} />
+              <Route path="users/:userId" element={<UserDetailPage />} />
+            </Route>
+          </Route>
+          <Route path="/*" element={<MemberApp />} />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }

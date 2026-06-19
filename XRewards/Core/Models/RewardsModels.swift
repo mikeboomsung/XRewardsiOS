@@ -184,32 +184,16 @@ struct UserProfile {
 
 struct ValuePillar: Identifiable {
     let id = UUID()
-    let title: LocalizedStringResource
-    let subtitle: LocalizedStringResource
+    let title: String
+    let subtitle: String
     let icon: String
 }
 
 struct WorkflowStep: Identifiable {
     let id: Int
-    let title: LocalizedStringResource
-    let description: LocalizedStringResource
+    let title: String
+    let description: String
     let icon: String
 }
 
-enum PreviewData {
-    static let pillars: [ValuePillar] = [
-        ValuePillar(title: "Make Money", subtitle: "Visible income from every action", icon: "dollarsign.circle.fill"),
-        ValuePillar(title: "Continuous Earning", subtitle: "Passive income that keeps growing", icon: "chart.line.uptrend.xyaxis"),
-        ValuePillar(title: "Security & Fairness", subtitle: "Transparent rules and reward pool", icon: "shield.checkered"),
-        ValuePillar(title: "Belonging", subtitle: "Grow together with your team", icon: "person.3.fill"),
-        ValuePillar(title: "Growth", subtitle: "Training and events to level up", icon: "arrow.up.forward.circle.fill")
-    ]
-
-    static let workflowSteps: [WorkflowStep] = [
-        WorkflowStep(id: 1, title: "Act", description: "Recommend a customer or create value — one action, permanent binding.", icon: "hand.tap.fill"),
-        WorkflowStep(id: 2, title: "Confirm", description: "Transaction verified; points credited permanently to your account.", icon: "checkmark.seal.fill"),
-        WorkflowStep(id: 3, title: "Pool", description: "Platform profit flows into the monthly reward pool.", icon: "drop.fill"),
-        WorkflowStep(id: 4, title: "Dividend", description: "Monthly payout based on your share of total points.", icon: "banknote.fill"),
-        WorkflowStep(id: 5, title: "Sustain", description: "Points never expire — income continues over time.", icon: "infinity")
-    ]
-}
+enum PreviewData {}

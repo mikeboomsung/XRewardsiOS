@@ -57,7 +57,7 @@ export function UsersPage() {
                   <td>{user.points.confirmed}</td>
                   <td>{formatDate(user.updatedAt)}</td>
                   <td>
-                    <Link to={`/users/${user.uid}`}>View history</Link>
+                    <Link to={`/admin/users/${user.uid}`}>View history</Link>
                   </td>
                 </tr>
               ))}

@@ -4,6 +4,7 @@ struct ReferralSubmissionView: View {
     let category: RevenueCategory
     let onSubmitted: () -> Void
 
+    @Environment(\.appLanguage) private var lang
     @Environment(\.dismiss) private var dismiss
     @State private var inviteeName = ""
     @State private var inviteePhone = ""
@@ -16,14 +17,14 @@ struct ReferralSubmissionView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.cardSpacing) {
-                    Text("Submit the person you invited. You'll earn 10 points once the lead is recorded.")
+                    Text(L10n.submitReferralIntro(lang: lang))
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
 
                     VStack(spacing: 12) {
-                        referralField("Full Name", text: $inviteeName, keyboard: .default)
-                        referralField("Phone Number", text: $inviteePhone, keyboard: .phonePad)
-                        referralField("Email Address", text: $inviteeEmail, keyboard: .emailAddress)
+                        referralField(L10n.fullName(lang: lang), text: $inviteeName, keyboard: .default)
+                        referralField(L10n.phoneNumber(lang: lang), text: $inviteePhone, keyboard: .phonePad)
+                        referralField(L10n.emailAddress(lang: lang), text: $inviteeEmail, keyboard: .emailAddress)
                     }
 
                     if let errorMessage {
@@ -33,12 +34,12 @@ struct ReferralSubmissionView: View {
                     }
 
                     if didSucceed {
-                        Label("Referral submitted — 10 points added (pending)", systemImage: "checkmark.circle.fill")
+                        Label(L10n.referralSuccess(lang: lang), systemImage: "checkmark.circle.fill")
                             .font(.subheadline)
                             .foregroundStyle(Theme.success)
                     }
 
-                    PrimaryButton(title: "Submit Referral") {
+                    PrimaryButton(title: L10n.submitReferral(lang: lang)) {
                         Task { await submit() }
                     }
                     .disabled(isSubmitting || !isFormValid)
@@ -47,11 +48,11 @@ struct ReferralSubmissionView: View {
                 .padding(Theme.horizontalPadding)
             }
             .screenBackground()
-            .navigationTitle("Refer \(category.displayName)")
+            .navigationTitle(L10n.referCategory(category.displayName(for: lang), lang: lang))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                    Button(L10n.close(lang: lang)) { dismiss() }
                         .foregroundStyle(Theme.accentGold)
                 }
             }
@@ -108,4 +109,5 @@ struct ReferralSubmissionView: View {
 
 #Preview {
     ReferralSubmissionView(category: .insurance) {}
+        .environment(\.appLanguage, .zh)
 }

@@ -12,18 +12,16 @@ final class RewardsStore {
     var referrals: [ReferralRecord] = []
     var isLoading = false
     var usesLiveData = false
+    var isGuestPreview = false
 
     private let liveService = LiveRewardsService()
+    private let mockService = MockRewardsService()
 
-    func load(isAuthenticated: Bool) async {
+    func loadMember() async {
         isLoading = true
-        usesLiveData = isAuthenticated
+        usesLiveData = true
+        isGuestPreview = false
         defer { isLoading = false }
-
-        guard isAuthenticated else {
-            clear()
-            return
-        }
 
         await liveService.refresh()
 
@@ -44,12 +42,40 @@ final class RewardsStore {
         referrals = await referralsTask
     }
 
-    func refreshAfterReferral(isAuthenticated: Bool) async {
-        guard isAuthenticated else { return }
-        await load(isAuthenticated: true)
+    func loadGuestPreview(language: AppUILanguage) async {
+        isLoading = true
+        usesLiveData = false
+        isGuestPreview = true
+        defer { isLoading = false }
+
+        async let profileTask = mockService.fetchProfile()
+        async let dashboardTask = mockService.fetchDashboard()
+        async let transactionsTask = mockService.fetchTransactions()
+        async let dividendsTask = mockService.fetchDividends()
+        async let currentDividendTask = mockService.fetchCurrentDividend()
+        async let teamTask = mockService.fetchTeam()
+        async let referralsTask = mockService.fetchReferrals()
+
+        let mockProfile = await profileTask
+        profile = UserProfile(
+            name: L10n.guestProfileName(lang: language),
+            memberID: L10n.guestMemberID(lang: language),
+            memberSince: mockProfile.memberSince
+        )
+        dashboard = await dashboardTask
+        transactions = await transactionsTask
+        dividends = await dividendsTask
+        currentDividend = await currentDividendTask
+        team = await teamTask
+        referrals = await referralsTask
     }
 
-    private func clear() {
+    func refreshAfterReferral(isMember: Bool) async {
+        guard isMember else { return }
+        await loadMember()
+    }
+
+    func clear() {
         profile = nil
         dashboard = nil
         transactions = []
@@ -57,6 +83,8 @@ final class RewardsStore {
         currentDividend = nil
         team = nil
         referrals = []
+        usesLiveData = false
+        isGuestPreview = false
     }
 }
 

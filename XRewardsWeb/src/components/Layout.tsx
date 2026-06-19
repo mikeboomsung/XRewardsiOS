@@ -17,10 +17,11 @@ export function Layout() {
       </div>
 
       <nav className="nav">
-        <NavLink to="/" end>
+        <NavLink to="/admin" end>
           Referrals
         </NavLink>
-        <NavLink to="/users">Members</NavLink>
+        <NavLink to="/admin/users">Members</NavLink>
+        <NavLink to="/">Member app</NavLink>
       </nav>
 
       <Outlet />

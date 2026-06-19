@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct DividendsView: View {
+    @Environment(\.appLanguage) private var lang
     @Environment(RewardsStore.self) private var store
 
     var body: some View {
@@ -11,7 +12,7 @@ struct DividendsView: View {
                         currentPeriodCard(current)
                     }
 
-                    Text("History")
+                    Text(L10n.history(lang: lang))
                         .font(.headline)
                         .foregroundStyle(Theme.textPrimary)
 
@@ -24,19 +25,19 @@ struct DividendsView: View {
                 .padding(Theme.horizontalPadding)
             }
             .screenBackground()
-            .navigationTitle("Dividends")
+            .navigationTitle(L10n.dividends(lang: lang))
         }
     }
 
     private func currentPeriodCard(_ period: DividendPeriod) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Current Period")
+            Text(L10n.currentPeriod(lang: lang))
                 .font(.headline)
                 .foregroundStyle(Theme.textPrimary)
 
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Estimated Payout")
+                    Text(L10n.estimatedPayout(lang: lang))
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
                     Text(period.payoutAmount.currencyString)
@@ -46,10 +47,10 @@ struct DividendsView: View {
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(period.status.displayName)
+                    Text(period.status.displayName(for: lang))
                         .font(.caption)
                         .foregroundStyle(Theme.pending)
-                    Text("Settles Jul 1")
+                    Text(L10n.settlesJuly1(lang: lang))
                         .font(.caption2)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -57,9 +58,9 @@ struct DividendsView: View {
 
             Divider().overlay(Theme.textSecondary.opacity(0.3))
 
-            detailRow("Pool Size", value: period.poolAmount.currencyString)
-            detailRow("Your Share", value: period.userShare.percentString)
-            detailRow("Your Points", value: period.userPoints.pointsString)
+            detailRow(L10n.poolSize(lang: lang), value: period.poolAmount.currencyString)
+            detailRow(L10n.yourShare(lang: lang), value: period.userShare.percentString)
+            detailRow(L10n.yourPoints(lang: lang), value: period.userPoints.pointsString)
         }
         .cardStyle()
     }
@@ -78,7 +79,7 @@ struct DividendsView: View {
     }
 
     private var formulaFooter: some View {
-        Text("Your monthly dividend = (your points ÷ total platform points) × reward pool. Amounts are estimates until settlement.")
+        Text(L10n.dividendFormula(lang: lang))
             .font(.caption)
             .foregroundStyle(Theme.textSecondary)
             .padding(.top, 8)
@@ -87,5 +88,6 @@ struct DividendsView: View {
 
 #Preview {
     DividendsView()
-        .environment(RewardsStore())
+        .environment(RewardsStore.preview())
+        .environment(\.appLanguage, .zh)
 }

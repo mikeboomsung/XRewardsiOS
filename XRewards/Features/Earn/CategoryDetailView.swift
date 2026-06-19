@@ -2,11 +2,13 @@ import AdventureServices
 import SwiftUI
 
 struct CategoryDetailView: View {
+    @Environment(\.appLanguage) private var lang
+    @Environment(RewardsStore.self) private var store
     let category: RevenueCategory
 
-    @StateObject private var authService = AuthenticationService.shared
+    @StateObject private var session = XRewardsSession.shared
     @State private var showReferralForm = false
-    @Environment(RewardsStore.self) private var store
+    @State private var showGuestAlert = false
 
     var body: some View {
         ScrollView {
@@ -16,7 +18,7 @@ struct CategoryDetailView: View {
                         .font(.largeTitle)
                         .foregroundStyle(Theme.accentGold)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(category.displayName)
+                        Text(category.displayName(for: lang))
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundStyle(Theme.textPrimary)
@@ -26,20 +28,20 @@ struct CategoryDetailView: View {
                     }
                 }
 
-                Text(category.summary)
+                Text(category.summary(for: lang))
                     .font(.body)
                     .foregroundStyle(Theme.textSecondary)
 
-                Text("Point Table")
+                Text(L10n.pointTable(lang: lang))
                     .font(.headline)
                     .foregroundStyle(Theme.textPrimary)
 
-                ForEach(category.actions) { action in
+                ForEach(Array(category.actions(for: lang).enumerated()), id: \.offset) { _, action in
                     HStack {
                         Text(action.name)
                             .foregroundStyle(Theme.textPrimary)
                         Spacer()
-                        Text("\(action.pointRange) pts")
+                        Text("\(action.range) pts")
                             .foregroundStyle(Theme.accentGold)
                             .fontWeight(.semibold)
                     }
@@ -48,12 +50,16 @@ struct CategoryDetailView: View {
                     .clipShape(RoundedRectangle(cornerRadius: Theme.tileCornerRadius))
                 }
 
-                PrimaryButton(title: "Start Earning") {
-                    showReferralForm = true
+                PrimaryButton(title: L10n.startEarning(lang: lang)) {
+                    if session.isGuest {
+                        showGuestAlert = true
+                    } else {
+                        showReferralForm = true
+                    }
                 }
                 .padding(.top, 8)
 
-                Text("Submit invitee details to earn 10 referral points.")
+                Text(L10n.submitReferralHint(lang: lang))
                     .font(.caption)
                     .foregroundStyle(Theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -61,12 +67,15 @@ struct CategoryDetailView: View {
             .padding(Theme.horizontalPadding)
         }
         .screenBackground()
-        .navigationTitle(category.displayName)
+        .navigationTitle(category.displayName(for: lang))
         .navigationBarTitleDisplayMode(.inline)
+        .alert(L10n.guestCannotEarn(lang: lang), isPresented: $showGuestAlert) {
+            Button(L10n.ok(lang: lang), role: .cancel) {}
+        }
         .sheet(isPresented: $showReferralForm) {
             ReferralSubmissionView(category: category) {
                 Task {
-                    await store.refreshAfterReferral(isAuthenticated: authService.isAuthenticated)
+                    await store.refreshAfterReferral(isMember: session.isMember)
                 }
             }
         }
@@ -76,6 +85,7 @@ struct CategoryDetailView: View {
 #Preview {
     NavigationStack {
         CategoryDetailView(category: .insurance)
-            .environment(RewardsStore())
+            .environment(RewardsStore.preview())
+            .environment(\.appLanguage, .zh)
     }
 }

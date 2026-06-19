@@ -2,39 +2,57 @@ import AdventureServices
 import SwiftUI
 
 struct MainTabView: View {
+    @AppStorage(AppUILanguage.storageKey) private var uiLanguage = AppUILanguage.default.rawValue
     @State private var store = RewardsStore()
     @StateObject private var authService = AuthenticationService.shared
+    @StateObject private var session = XRewardsSession.shared
+
+    private var lang: AppUILanguage { uiLanguage.appLanguage }
 
     var body: some View {
         TabView {
             HomeView()
-                .tabItem { Label("Home", systemImage: "house.fill") }
+                .tabItem { Label(L10n.tabHome(lang: lang), systemImage: "house.fill") }
 
             EarnView()
-                .tabItem { Label("Earn", systemImage: "square.grid.2x2.fill") }
+                .tabItem { Label(L10n.tabEarn(lang: lang), systemImage: "square.grid.2x2.fill") }
 
             ActivityView()
-                .tabItem { Label("Activity", systemImage: "list.bullet.rectangle") }
+                .tabItem { Label(L10n.tabActivity(lang: lang), systemImage: "list.bullet.rectangle") }
 
             TeamView()
-                .tabItem { Label("Team", systemImage: "person.3.fill") }
+                .tabItem { Label(L10n.tabTeam(lang: lang), systemImage: "person.3.fill") }
 
             ProfileView()
-                .tabItem { Label("Profile", systemImage: "person.crop.circle") }
+                .tabItem { Label(L10n.tabProfile(lang: lang), systemImage: "person.crop.circle") }
         }
+        .id(uiLanguage)
         .tint(Theme.accentGold)
         .environment(store)
-        .task(id: authService.isAuthenticated) {
-            guard authService.isAuthenticated else {
-                await store.load(isAuthenticated: false)
-                return
+        .environment(\.appLanguage, lang)
+        .task(id: sessionTaskID) {
+            if session.isMember {
+                try? await CallableSupport.ensureUserProfile()
+                await store.loadMember()
+            } else if session.isGuest {
+                await store.loadGuestPreview(language: lang)
+            } else {
+                store.clear()
             }
-            try? await CallableSupport.ensureUserProfile()
-            await store.load(isAuthenticated: true)
         }
+        .onChange(of: uiLanguage) { _, _ in
+            if session.isGuest {
+                Task { await store.loadGuestPreview(language: lang) }
+            }
+        }
+    }
+
+    private var sessionTaskID: String {
+        "\(session.isMember)-\(session.isGuest)-\(uiLanguage)"
     }
 }
 
 #Preview {
     MainTabView()
+        .environment(\.appLanguage, .zh)
 }

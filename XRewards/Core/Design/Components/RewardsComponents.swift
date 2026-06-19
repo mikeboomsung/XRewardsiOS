@@ -2,10 +2,12 @@ import SwiftUI
 
 struct PointBalanceCard: View {
     let totalPoints: Int
+    var title: String = "Total Points"
+    var footnote: String = "Permanent · Never expire"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Total Points")
+            Text(title)
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
 
@@ -14,7 +16,7 @@ struct PointBalanceCard: View {
                 .foregroundStyle(Theme.accentGold)
                 .accessibilityLabel("Total points \(totalPoints)")
 
-            Text("Permanent · Never expire")
+            Text(footnote)
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -25,14 +27,16 @@ struct PointBalanceCard: View {
 struct DividendEstimateCard: View {
     let amount: Decimal
     let poolPercent: Int
-    let subtitle: LocalizedStringResource
+    var title: String = "Estimated This Month"
+    var subtitle: String = "Based on current pool"
+    var poolFootnote: String = "Reward pool: 40% of platform profit"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "banknote.fill")
                     .foregroundStyle(Theme.accentGold)
-                Text("Estimated This Month")
+                Text(title)
                     .font(.headline)
                     .foregroundStyle(Theme.textPrimary)
             }
@@ -46,7 +50,7 @@ struct DividendEstimateCard: View {
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
 
-            Text("Reward pool: \(poolPercent)% of platform profit")
+            Text(poolFootnote)
                 .font(.caption2)
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -55,7 +59,7 @@ struct DividendEstimateCard: View {
 }
 
 struct StatCard: View {
-    let title: LocalizedStringResource
+    let title: String
     let value: String
     let icon: String
 
@@ -78,6 +82,7 @@ struct StatCard: View {
 }
 
 struct CategoryTile: View {
+    @Environment(\.appLanguage) private var lang
     let category: RevenueCategory
 
     var body: some View {
@@ -86,7 +91,7 @@ struct CategoryTile: View {
                 .font(.title2)
                 .foregroundStyle(Theme.accentGold)
 
-            Text(category.displayName)
+            Text(category.displayName(for: lang))
                 .font(.headline)
                 .foregroundStyle(Theme.textPrimary)
                 .multilineTextAlignment(.leading)
@@ -135,10 +140,11 @@ struct TransactionRow: View {
 }
 
 struct StatusBadge: View {
+    @Environment(\.appLanguage) private var lang
     let status: TransactionStatus
 
     var body: some View {
-        Text(status.displayName)
+        Text(status.displayName(for: lang))
             .font(.caption2)
             .fontWeight(.semibold)
             .padding(.horizontal, 8)
@@ -150,6 +156,7 @@ struct StatusBadge: View {
 }
 
 struct WorkflowStepView: View {
+    @Environment(\.appLanguage) private var lang
     let step: WorkflowStep
     let isLast: Bool
 
@@ -171,7 +178,7 @@ struct WorkflowStepView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Step \(step.id)")
+                Text(L10n.stepNumber(step.id, lang: lang))
                     .font(.caption)
                     .foregroundStyle(Theme.accentGold)
                 Text(step.title)
@@ -214,19 +221,21 @@ struct ValuePillarRow: View {
 }
 
 struct RetentionChartView: View {
+    @Environment(\.appLanguage) private var lang
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Long-Term Retention")
+            Text(L10n.longTermRetention(lang: lang))
                 .font(.headline)
                 .foregroundStyle(Theme.textPrimary)
 
-            Text("Traditional one-time commissions fade. XRewards points stay valid — your share of the pool keeps paying.")
+            Text(L10n.retentionBody(lang: lang))
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
 
             HStack(alignment: .bottom, spacing: 24) {
-                chartBar(label: "Traditional", value: 0.2, caption: "20%")
-                chartBar(label: "XRewards", value: 0.9, caption: "90%+", highlight: true)
+                chartBar(label: L10n.traditionalLabel(lang: lang), value: 0.2, caption: "20%")
+                chartBar(label: L10n.xrewardsLabel(lang: lang), value: 0.9, caption: "90%+", highlight: true)
             }
             .frame(maxWidth: .infinity)
             .padding(.top, 8)
@@ -252,26 +261,30 @@ struct RetentionChartView: View {
 }
 
 struct RewardPoolDiagramView: View {
+    @Environment(\.appLanguage) private var lang
     let poolPercentRange: ClosedRange<Int>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Reward Pool")
+            Text(L10n.rewardPoolTitle(lang: lang))
                 .font(.headline)
                 .foregroundStyle(Theme.textPrimary)
 
             HStack(spacing: 8) {
-                flowBox("Platform Profit", icon: "chart.pie.fill")
+                flowBox(L10n.platformProfit(lang: lang), icon: "chart.pie.fill")
                 Image(systemName: "arrow.right")
                     .foregroundStyle(Theme.accentGold)
-                flowBox("\(poolPercentRange.lowerBound)–\(poolPercentRange.upperBound)% Pool", icon: "drop.fill")
+                flowBox(
+                    L10n.poolPercentRange(poolPercentRange.lowerBound, poolPercentRange.upperBound, lang: lang),
+                    icon: "drop.fill"
+                )
                 Image(systemName: "arrow.right")
                     .foregroundStyle(Theme.accentGold)
-                flowBox("Your Share", icon: "person.fill")
+                flowBox(L10n.poolShareLabel(lang: lang), icon: "person.fill")
             }
             .font(.caption)
 
-            Text("Dividend = (your points ÷ total platform points) × reward pool")
+            Text(L10n.dividendFormulaShort(lang: lang))
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -294,7 +307,7 @@ struct RewardPoolDiagramView: View {
 }
 
 struct TeamStatCard: View {
-    let title: LocalizedStringResource
+    let title: String
     let value: String
 
     var body: some View {
@@ -316,6 +329,7 @@ struct TeamStatCard: View {
 }
 
 struct DividendRow: View {
+    @Environment(\.appLanguage) private var lang
     let period: DividendPeriod
 
     var body: some View {
@@ -324,7 +338,7 @@ struct DividendRow: View {
                 Text(period.month.monthYear)
                     .font(.headline)
                     .foregroundStyle(Theme.textPrimary)
-                Text(period.status.displayName)
+                Text(period.status.displayName(for: lang))
                     .font(.caption)
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -340,8 +354,18 @@ struct DividendRow: View {
 }
 
 struct PrimaryButton: View {
-    let title: LocalizedStringResource
+    let title: String
     let action: () -> Void
+
+    init(title: String, action: @escaping () -> Void) {
+        self.title = title
+        self.action = action
+    }
+
+    init(title: LocalizedStringResource, action: @escaping () -> Void) {
+        self.title = String(localized: title)
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {

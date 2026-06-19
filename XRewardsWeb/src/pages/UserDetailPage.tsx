@@ -33,7 +33,7 @@ export function UserDetailPage() {
 
   return (
     <div className="card">
-      <p><Link to="/users">← Back to members</Link></p>
+      <p><Link to="/admin/users">← Back to members</Link></p>
       <h2>{user.displayName ?? 'Member'}</h2>
       <p className="muted">{user.memberId} · {user.email ?? 'No email'}</p>
 

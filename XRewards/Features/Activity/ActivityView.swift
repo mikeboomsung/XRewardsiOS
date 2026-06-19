@@ -1,14 +1,21 @@
 import SwiftUI
 
 struct ActivityView: View {
+    @Environment(\.appLanguage) private var lang
     @Environment(RewardsStore.self) private var store
     @State private var filter: ActivityFilter = .all
 
-    enum ActivityFilter: String, CaseIterable {
-        case all = "All"
-        case referrals = "Referrals"
-        case pending = "Pending"
-        case confirmed = "Confirmed"
+    enum ActivityFilter: CaseIterable {
+        case all, referrals, pending, confirmed
+
+        func label(lang: AppUILanguage) -> String {
+            switch self {
+            case .all: return L10n.filterAll(lang: lang)
+            case .referrals: return L10n.filterReferrals(lang: lang)
+            case .pending: return L10n.filterPending(lang: lang)
+            case .confirmed: return L10n.filterConfirmed(lang: lang)
+            }
+        }
     }
 
     private var filteredTransactions: [PointTransaction] {
@@ -16,7 +23,7 @@ struct ActivityView: View {
         case .all:
             return store.transactions
         case .referrals:
-            return store.transactions.filter { $0.action.localizedCaseInsensitiveContains("referral") }
+            return store.transactions.filter { $0.action.localizedCaseInsensitiveContains("referral") || $0.action.localizedCaseInsensitiveContains("推荐") }
         case .pending:
             return store.transactions.filter { $0.status == .pending }
         case .confirmed:
@@ -29,7 +36,7 @@ struct ActivityView: View {
             VStack(spacing: 0) {
                 Picker("Filter", selection: $filter) {
                     ForEach(ActivityFilter.allCases, id: \.self) { option in
-                        Text(option.rawValue).tag(option)
+                        Text(option.label(lang: lang)).tag(option)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -39,9 +46,9 @@ struct ActivityView: View {
                     referralsList
                 } else if filteredTransactions.isEmpty {
                     ContentUnavailableView(
-                        "No Activity",
+                        L10n.noActivity(lang: lang),
                         systemImage: "tray",
-                        description: Text("Transactions matching this filter will appear here.")
+                        description: Text(L10n.noActivityDesc(lang: lang))
                     )
                     .foregroundStyle(Theme.textSecondary)
                 } else {
@@ -55,7 +62,7 @@ struct ActivityView: View {
                 }
             }
             .screenBackground()
-            .navigationTitle("Activity")
+            .navigationTitle(L10n.activity(lang: lang))
         }
     }
 
@@ -63,9 +70,9 @@ struct ActivityView: View {
         Group {
             if store.referrals.isEmpty {
                 ContentUnavailableView(
-                    "No Referrals Yet",
+                    L10n.noReferrals(lang: lang),
                     systemImage: "person.badge.plus",
-                    description: Text("Submit invitee details from Earn → Start Earning to earn 10 points per referral.")
+                    description: Text(L10n.noReferralsDesc(lang: lang))
                 )
                 .foregroundStyle(Theme.textSecondary)
             } else {
@@ -82,6 +89,7 @@ struct ActivityView: View {
 }
 
 struct ReferralRow: View {
+    @Environment(\.appLanguage) private var lang
     let referral: ReferralRecord
 
     var body: some View {
@@ -101,7 +109,7 @@ struct ReferralRow: View {
             HStack {
                 Text(referral.inviteePhone)
                 Spacer()
-                Text(referral.category.displayName)
+                Text(referral.category.displayName(for: lang))
                 StatusBadge(status: referral.status)
             }
             .font(.caption)
@@ -113,5 +121,6 @@ struct ReferralRow: View {
 
 #Preview {
     ActivityView()
-        .environment(RewardsStore())
+        .environment(RewardsStore.preview())
+        .environment(\.appLanguage, .zh)
 }
