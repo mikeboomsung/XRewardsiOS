@@ -6,13 +6,7 @@ enum AppCheckWarmup {
     static func prepare() async {
         do {
             let token = try await fetchToken(forceRefresh: false)
-            #if DEBUG
-            if let debugToken = token.debugToken {
-                print("🔐 [XRewards] App Check debug token (register in Firebase Console): \(debugToken)")
-            } else {
-                print("🔐 [XRewards] App Check token ready (expires \(token.expirationDate))")
-            }
-            #endif
+            print("🔐 [XRewards] App Check warmup OK: \(token.token.prefix(24))… (expires \(token.expirationDate))")
         } catch {
             print("⚠️ [XRewards] App Check warmup failed: \(error.localizedDescription)")
         }
@@ -38,30 +32,5 @@ enum AppCheckWarmup {
                 continuation.resume(returning: token)
             }
         }
-    }
-}
-
-private extension AppCheckToken {
-    /// Debug provider exposes the token UUID in the JWT payload for Console registration.
-    var debugToken: String? {
-        let parts = token.split(separator: ".")
-        guard parts.count >= 2 else { return nil }
-
-        var payload = String(parts[1])
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-        while payload.count % 4 != 0 {
-            payload.append("=")
-        }
-
-        guard
-            let data = Data(base64Encoded: payload),
-            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-            let subject = json["sub"] as? String
-        else {
-            return nil
-        }
-
-        return subject
     }
 }

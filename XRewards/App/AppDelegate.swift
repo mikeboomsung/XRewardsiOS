@@ -10,11 +10,14 @@ import FirebaseAuth
 import FirebaseMessaging
 #endif
 
+@objc(AppDelegate)
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        AppLaunch.runIfNeeded()
+
         #if canImport(FirebaseMessaging)
         Messaging.messaging().delegate = self
         #endif
@@ -38,14 +41,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
         print("⚠️ [XRewards] APNs registration failed: \(error.localizedDescription)")
-    }
-
-    func application(
-        _ app: UIApplication,
-        open url: URL,
-        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-    ) -> Bool {
-        return GIDSignIn.sharedInstance.handle(url)
     }
 }
 

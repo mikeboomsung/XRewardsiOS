@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Profile creation is handled by createUserDocument Cloud Function.
+      // FCM may merge-create fcmTokens before the profile exists.
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.keys().hasOnly(['fcmTokens']);
+
+      // Allow members to update push tokens on their own document only.
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fcmTokens']);
+
+      allow delete: if false;
+
+      match /referrals/{referralId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if false;
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if false;
+      }
+    }
+
+    match /adminUsers/{adminId} {
+      allow read, write: if false;
+    }
+
+    match /adminReferrals/{referralId} {
+      allow read, write: if false;
+    }
+  }
+}

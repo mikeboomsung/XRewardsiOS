@@ -5,6 +5,10 @@ struct ProfileView: View {
     @Environment(RewardsStore.self) private var store
     @StateObject private var authService = AuthenticationService.shared
     @State private var isSigningOut = false
+    @State private var isEditingName = false
+    @State private var editedName = ""
+    @State private var isSavingName = false
+    @State private var nameError: String?
 
     var body: some View {
         NavigationStack {
@@ -26,15 +30,21 @@ struct ProfileView: View {
                                 Text("Member since \(profile.memberSince.mediumDate)")
                                     .font(.caption)
                                     .foregroundStyle(Theme.textSecondary)
-                                if store.usesLiveData {
-                                    Text("Live account")
-                                        .font(.caption2)
-                                        .foregroundStyle(Theme.success)
-                                }
                             }
                         }
                         .padding(.vertical, 8)
                         .listRowBackground(Theme.backgroundCard)
+
+                        if store.usesLiveData {
+                            Button {
+                                editedName = profile.name == "Member" ? "" : profile.name
+                                nameError = nil
+                                isEditingName = true
+                            } label: {
+                                Label("Edit Name", systemImage: "pencil")
+                            }
+                            .listRowBackground(Theme.backgroundCard)
+                        }
                     }
                 }
 
@@ -97,6 +107,57 @@ struct ProfileView: View {
             .foregroundStyle(Theme.textPrimary)
             .screenBackground()
             .navigationTitle("Profile")
+            .sheet(isPresented: $isEditingName) {
+                editNameSheet
+            }
+        }
+    }
+
+    private var editNameSheet: some View {
+        NavigationStack {
+            Form {
+                Section("Display name") {
+                    TextField("Your name", text: $editedName)
+                        .textInputAutocapitalization(.words)
+                        .autocorrectionDisabled()
+                }
+
+                if let nameError {
+                    Section {
+                        Text(nameError)
+                            .foregroundStyle(.red)
+                            .font(.footnote)
+                    }
+                }
+            }
+            .navigationTitle("Edit Name")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { isEditingName = false }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        Task { await saveName() }
+                    }
+                    .disabled(isSavingName || editedName.trimmingCharacters(in: .whitespacesAndNewlines).count < 2)
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+
+    private func saveName() async {
+        isSavingName = true
+        nameError = nil
+        defer { isSavingName = false }
+
+        do {
+            _ = try await ProfileService.shared.updateDisplayName(editedName)
+            await store.load(isAuthenticated: authService.isAuthenticated)
+            isEditingName = false
+        } catch {
+            nameError = error.localizedDescription
         }
     }
 
@@ -109,5 +170,5 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView()
-        .environment(RewardsStore())
+        .environment(RewardsStore.preview())
 }

@@ -1,41 +1,29 @@
-import FirebaseFunctions
 import Foundation
 
 @MainActor
 final class LiveRewardsService: RewardsService {
-    private let functions = Functions.functions(region: "us-central1")
-    private let fallback = MockRewardsService()
-
     func fetchProfile() async -> UserProfile {
-        if let payload = await loadPayload() { return payload.profile }
-        return await fallback.fetchProfile()
+        await loadPayload()?.profile ?? EmptyRewardsData.profile()
     }
 
     func fetchDashboard() async -> DashboardSummary {
-        if let payload = await loadPayload() { return payload.dashboard }
-        return await fallback.fetchDashboard()
+        await loadPayload()?.dashboard ?? EmptyRewardsData.dashboard
     }
 
     func fetchTransactions() async -> [PointTransaction] {
-        if let payload = await loadPayload() { return payload.transactions }
-        return await fallback.fetchTransactions()
+        await loadPayload()?.transactions ?? []
     }
 
     func fetchDividends() async -> [DividendPeriod] {
-        if let payload = await loadPayload() { return payload.dividends }
-        return await fallback.fetchDividends()
+        await loadPayload()?.dividends ?? []
     }
 
     func fetchCurrentDividend() async -> DividendPeriod {
-        if let payload = await loadPayload(), let current = payload.currentDividend {
-            return current
-        }
-        return await fallback.fetchCurrentDividend()
+        await loadPayload()?.currentDividend ?? EmptyRewardsData.estimatedDividend
     }
 
     func fetchTeam() async -> TeamSummary {
-        if let payload = await loadPayload() { return payload.team }
-        return await fallback.fetchTeam()
+        await loadPayload()?.team ?? EmptyRewardsData.team
     }
 
     func fetchReferrals() async -> [ReferralRecord] {
@@ -53,6 +41,7 @@ final class LiveRewardsService: RewardsService {
     }
 
     private var cachedPayload: Payload?
+    private var loadingPayloadTask: Task<Payload?, Never>?
 
     func refresh() async {
         cachedPayload = await loadPayload(force: true)
@@ -60,38 +49,56 @@ final class LiveRewardsService: RewardsService {
 
     private func loadPayload(force: Bool = false) async -> Payload? {
         if !force, let cachedPayload { return cachedPayload }
+        if !force, let loadingPayloadTask {
+            return await loadingPayloadTask.value
+        }
 
+        let task = Task { @MainActor [self] in
+            await fetchPayload()
+        }
+        loadingPayloadTask = task
+        let payload = await task.value
+        loadingPayloadTask = nil
+        return payload
+    }
+
+    private func fetchPayload() async -> Payload? {
         do {
-            let callable = functions.httpsCallable("getRewardsData")
-            let result = try await callable.call([:])
-            guard
-                let root = result.data as? [String: Any],
-                let success = root["success"] as? Bool,
-                success
-            else {
-                return nil
-            }
-
-            let payload = Payload(
-                profile: decodeProfile(root["profile"] as? [String: Any]),
-                dashboard: decodeDashboard(root["dashboard"] as? [String: Any]),
-                transactions: decodeTransactions(root["transactions"] as? [[String: Any]]),
-                dividends: decodeDividends(root["dividends"] as? [[String: Any]]),
-                currentDividend: decodeDividend(root["currentDividend"] as? [String: Any]),
-                team: decodeTeam(root["team"] as? [String: Any]),
-                referrals: decodeReferrals(root["referrals"] as? [[String: Any]])
-            )
+            let root = try await CallableSupport.call("getRewardsData")
+            let payload = decodePayload(root)
             cachedPayload = payload
             return payload
+        } catch let error as CallableSupportError {
+            if case .server(let code, _) = error, code == "NOT_FOUND" {
+                try? await CallableSupport.ensureUserProfile()
+                if let root = try? await CallableSupport.call("getRewardsData") {
+                    let payload = decodePayload(root)
+                    cachedPayload = payload
+                    return payload
+                }
+            }
+            return nil
         } catch {
             return nil
         }
     }
 
+    private func decodePayload(_ root: [String: Any]) -> Payload {
+        Payload(
+            profile: decodeProfile(root["profile"] as? [String: Any]),
+            dashboard: decodeDashboard(root["dashboard"] as? [String: Any]),
+            transactions: decodeTransactions(root["transactions"] as? [[String: Any]]),
+            dividends: decodeDividends(root["dividends"] as? [[String: Any]]),
+            currentDividend: decodeDividend(root["currentDividend"] as? [String: Any]),
+            team: decodeTeam(root["team"] as? [String: Any]),
+            referrals: decodeReferrals(root["referrals"] as? [[String: Any]])
+        )
+    }
+
     private func decodeProfile(_ data: [String: Any]?) -> UserProfile {
         UserProfile(
             name: data?["name"] as? String ?? "Member",
-            memberID: data?["memberID"] as? String ?? "XR-00000",
+            memberID: data?["memberID"] as? String ?? "—",
             memberSince: parseDate(data?["memberSince"] as? String) ?? .now
         )
     }

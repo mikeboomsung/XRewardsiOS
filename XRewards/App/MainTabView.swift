@@ -25,7 +25,12 @@ struct MainTabView: View {
         .tint(Theme.accentGold)
         .environment(store)
         .task(id: authService.isAuthenticated) {
-            await store.load(isAuthenticated: authService.isAuthenticated)
+            guard authService.isAuthenticated else {
+                await store.load(isAuthenticated: false)
+                return
+            }
+            try? await CallableSupport.ensureUserProfile()
+            await store.load(isAuthenticated: true)
         }
     }
 }

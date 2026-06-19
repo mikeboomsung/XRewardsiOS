@@ -1,4 +1,3 @@
-import FirebaseFunctions
 import Foundation
 
 struct ReferralRecord: Identifiable, Hashable {
@@ -15,7 +14,6 @@ struct ReferralRecord: Identifiable, Hashable {
 @MainActor
 final class ReferralService {
     static let shared = ReferralService()
-    private let functions = Functions.functions(region: "us-central1")
 
     private init() {}
 
@@ -25,34 +23,22 @@ final class ReferralService {
         inviteePhone: String,
         inviteeEmail: String
     ) async throws -> Int {
-        let callable = functions.httpsCallable("submitReferral")
-        let result = try await callable.call([
-            "category": category.rawValue,
-            "inviteeName": inviteeName,
-            "inviteePhone": inviteePhone,
-            "inviteeEmail": inviteeEmail,
-        ])
+        try await CallableSupport.ensureUserProfile()
 
-        guard
-            let data = result.data as? [String: Any],
-            let success = data["success"] as? Bool,
-            success,
-            let points = data["pointsAwarded"] as? Int
-        else {
-            let message = (result.data as? [String: Any])?["message"] as? String
-            throw ReferralServiceError.server(message ?? "Could not submit referral.")
+        let data = try await CallableSupport.call(
+            "submitReferral",
+            data: [
+                "category": category.rawValue,
+                "inviteeName": inviteeName,
+                "inviteePhone": inviteePhone,
+                "inviteeEmail": inviteeEmail,
+            ]
+        )
+
+        guard let points = data["pointsAwarded"] as? Int else {
+            throw CallableSupportError.server(code: "INVALID_RESPONSE", message: "Could not submit referral.")
         }
 
         return points
-    }
-}
-
-enum ReferralServiceError: LocalizedError {
-    case server(String)
-
-    var errorDescription: String? {
-        switch self {
-        case .server(let message): message
-        }
     }
 }
