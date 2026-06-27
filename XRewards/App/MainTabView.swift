@@ -20,9 +20,6 @@ struct MainTabView: View {
             ActivityView()
                 .tabItem { Label(L10n.tabActivity(lang: lang), systemImage: "list.bullet.rectangle") }
 
-            TeamView()
-                .tabItem { Label(L10n.tabTeam(lang: lang), systemImage: "person.3.fill") }
-
             ProfileView()
                 .tabItem { Label(L10n.tabProfile(lang: lang), systemImage: "person.crop.circle") }
         }

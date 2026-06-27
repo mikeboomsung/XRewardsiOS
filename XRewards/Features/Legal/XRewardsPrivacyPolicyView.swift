@@ -121,7 +121,13 @@ private struct PrivacyPolicyWebView: View {
     }
 
     private var policyURL: URL? {
-        let name = lang == .zh ? "privacy-policy" : "privacy-policy-en"
+        let name: String
+        switch lang {
+        case .zh: name = "privacy-policy"
+        case .zhHant: name = "privacy-policy-zh-hant"
+        case .en: name = "privacy-policy-en"
+        case .es: name = "privacy-policy-es"
+        }
         for sub in ["PrivacyPolicy", "Resources/PrivacyPolicy", nil] {
             if let url = Bundle.main.url(forResource: name, withExtension: "html", subdirectory: sub) {
                 return url

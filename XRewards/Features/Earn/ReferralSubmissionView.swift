@@ -21,6 +21,10 @@ struct ReferralSubmissionView: View {
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
 
+                    Text(L10n.submitLeadPrivacyNotice(lang: lang))
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+
                     VStack(spacing: 12) {
                         referralField(L10n.fullName(lang: lang), text: $inviteeName, keyboard: .default)
                         referralField(L10n.phoneNumber(lang: lang), text: $inviteePhone, keyboard: .phonePad)

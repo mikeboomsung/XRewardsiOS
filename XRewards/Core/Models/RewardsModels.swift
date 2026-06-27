@@ -170,12 +170,6 @@ struct DashboardSummary {
     let totalPlatformPoints: Int
 }
 
-struct TeamSummary {
-    let directMembers: Int
-    let totalDownline: Int
-    let teamPoints: Int
-}
-
 struct UserProfile {
     let name: String
     let memberID: String

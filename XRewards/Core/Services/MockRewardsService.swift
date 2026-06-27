@@ -47,7 +47,7 @@ final class MockRewardsService: RewardsService {
             PointTransaction(
                 id: UUID(),
                 category: .loans,
-                action: "Loan Referral",
+                action: "Loan Lead",
                 points: 500,
                 status: .pending,
                 createdAt: date(2026, 6, 14),
@@ -120,10 +120,6 @@ final class MockRewardsService: RewardsService {
                 status: .paid
             )
         ]
-    }
-
-    func fetchTeam() async -> TeamSummary {
-        TeamSummary(directMembers: 8, totalDownline: 34, teamPoints: 48_200)
     }
 
     func fetchReferrals() async -> [ReferralRecord] {

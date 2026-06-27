@@ -22,10 +22,6 @@ final class LiveRewardsService: RewardsService {
         await loadPayload()?.currentDividend ?? EmptyRewardsData.estimatedDividend
     }
 
-    func fetchTeam() async -> TeamSummary {
-        await loadPayload()?.team ?? EmptyRewardsData.team
-    }
-
     func fetchReferrals() async -> [ReferralRecord] {
         await loadPayload()?.referrals ?? []
     }
@@ -36,7 +32,6 @@ final class LiveRewardsService: RewardsService {
         let transactions: [PointTransaction]
         let dividends: [DividendPeriod]
         let currentDividend: DividendPeriod?
-        let team: TeamSummary
         let referrals: [ReferralRecord]
     }
 
@@ -90,7 +85,6 @@ final class LiveRewardsService: RewardsService {
             transactions: decodeTransactions(root["transactions"] as? [[String: Any]]),
             dividends: decodeDividends(root["dividends"] as? [[String: Any]]),
             currentDividend: decodeDividend(root["currentDividend"] as? [String: Any]),
-            team: decodeTeam(root["team"] as? [String: Any]),
             referrals: decodeReferrals(root["referrals"] as? [[String: Any]])
         )
     }
@@ -151,14 +145,6 @@ final class LiveRewardsService: RewardsService {
             userShare: decimal(item["userShare"]),
             payoutAmount: decimal(item["payoutAmount"]),
             status: DividendStatus(rawValue: item["status"] as? String ?? "") ?? .estimated
-        )
-    }
-
-    private func decodeTeam(_ data: [String: Any]?) -> TeamSummary {
-        TeamSummary(
-            directMembers: data?["directMembers"] as? Int ?? 0,
-            totalDownline: data?["totalDownline"] as? Int ?? 0,
-            teamPoints: data?["teamPoints"] as? Int ?? 0
         )
     }
 

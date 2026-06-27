@@ -19,10 +19,6 @@ enum EmptyRewardsData {
         )
     }
 
-    static var team: TeamSummary {
-        TeamSummary(directMembers: 0, totalDownline: 0, teamPoints: 0)
-    }
-
     static var estimatedDividend: DividendPeriod {
         DividendPeriod(
             id: UUID(),

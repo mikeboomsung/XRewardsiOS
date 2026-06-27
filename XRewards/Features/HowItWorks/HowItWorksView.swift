@@ -19,9 +19,6 @@ struct HowItWorksView: View {
                     )
                 }
 
-                RewardPoolDiagramView(poolPercentRange: 30...50)
-                RetentionChartView()
-
                 Text(L10n.fivePillars(lang: lang))
                     .font(.headline)
                     .foregroundStyle(Theme.textPrimary)
@@ -29,6 +26,11 @@ struct HowItWorksView: View {
                 ForEach(PreviewData.pillars(for: lang)) { pillar in
                     ValuePillarRow(pillar: pillar)
                 }
+
+                Text(L10n.howItWorksDisclaimer(lang: lang))
+                    .font(.caption)
+                    .foregroundStyle(Theme.textSecondary)
+                    .padding(.top, 8)
             }
             .padding(Theme.horizontalPadding)
         }

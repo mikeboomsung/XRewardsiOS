@@ -95,15 +95,7 @@ struct ProfileView: View {
                     }
                     .listRowBackground(Theme.backgroundCard)
 
-                    Link(destination: URL(string: supportURL(path: "rules"))!) {
-                        Label(L10n.rewardRules(lang: lang), systemImage: "doc.text.fill")
-                    }
-                    .listRowBackground(Theme.backgroundCard)
-                    Link(destination: URL(string: supportURL(path: "faq"))!) {
-                        Label(L10n.faq(lang: lang), systemImage: "questionmark.circle.fill")
-                    }
-                    .listRowBackground(Theme.backgroundCard)
-                    Link(destination: URL(string: supportURL(path: "contact"))!) {
+                    Link(destination: URL(string: "mailto:support@xrewards.app")!) {
                         Label(L10n.contactSupport(lang: lang), systemImage: "envelope.fill")
                     }
                     .listRowBackground(Theme.backgroundCard)
@@ -113,8 +105,7 @@ struct ProfileView: View {
                     HStack {
                         Label(L10n.language(lang: lang), systemImage: "globe")
                         Spacer()
-                        CurrentLanguageLabel()
-                        LanguageToggleButton()
+                        LanguagePickerMenu()
                     }
                     .listRowBackground(Theme.backgroundCard)
 
@@ -247,11 +238,6 @@ struct ProfileView: View {
         } catch {
             deleteError = error.localizedDescription
         }
-    }
-
-    private func supportURL(path: String) -> String {
-        let page = lang == .zh ? "support.html" : "support-en.html"
-        return "https://xrewards.app/\(page)#\(path)"
     }
 
     private func signOut() async {

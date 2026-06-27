@@ -1,12 +1,26 @@
 import Foundation
 import SwiftUI
 
-enum AppUILanguage: String, CaseIterable {
+enum AppUILanguage: String, CaseIterable, Identifiable {
     case zh
+    case zhHant = "zh-Hant"
     case en
+    case es
+
+    var id: String { rawValue }
 
     static let storageKey = "xrewards.ui.language"
     static let `default`: AppUILanguage = .zh
+
+    /// Native name shown in the language picker.
+    var nativeName: String {
+        switch self {
+        case .zh: "简体中文"
+        case .zhHant: "繁體中文"
+        case .en: "English"
+        case .es: "Español"
+        }
+    }
 }
 
 extension String {
@@ -26,30 +40,50 @@ extension EnvironmentValues {
     }
 }
 
-struct LanguageToggleButton: View {
+struct LanguagePickerMenu: View {
     @AppStorage(AppUILanguage.storageKey) private var uiLanguage = AppUILanguage.default.rawValue
 
     private var lang: AppUILanguage { uiLanguage.appLanguage }
-    /// NewStart-style: show the language you can switch *to*.
-    private var toggleLabel: String { lang == .zh ? "En" : "中文" }
 
     var body: some View {
-        Button(toggleLabel) {
-            uiLanguage = (lang == .zh ? AppUILanguage.en.rawValue : AppUILanguage.zh.rawValue)
+        Menu {
+            ForEach(AppUILanguage.allCases) { option in
+                Button {
+                    uiLanguage = option.rawValue
+                } label: {
+                    if option == lang {
+                        Label(option.nativeName, systemImage: "checkmark")
+                    } else {
+                        Text(option.nativeName)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "globe")
+                Text(lang.nativeName)
+                    .font(.footnote.weight(.semibold))
+            }
+            .foregroundStyle(Theme.accentGold)
         }
-        .font(.footnote.weight(.semibold))
-        .foregroundStyle(Theme.accentGold)
     }
 }
 
-/// Shows the active UI language label (简体中文 / English).
+/// Compact globe menu for toolbars (auth, privacy).
+struct LanguageToggleButton: View {
+    var body: some View {
+        LanguagePickerMenu()
+    }
+}
+
+/// Shows the active UI language label in settings rows.
 struct CurrentLanguageLabel: View {
     @AppStorage(AppUILanguage.storageKey) private var uiLanguage = AppUILanguage.default.rawValue
 
     private var lang: AppUILanguage { uiLanguage.appLanguage }
 
     var body: some View {
-        Text(lang == .zh ? L10n.languageChinese(lang: lang) : L10n.languageEnglish(lang: lang))
+        Text(lang.nativeName)
             .font(.subheadline)
             .foregroundStyle(Theme.textSecondary)
     }

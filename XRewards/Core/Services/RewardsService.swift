@@ -6,5 +6,4 @@ protocol RewardsService: Sendable {
     func fetchTransactions() async -> [PointTransaction]
     func fetchDividends() async -> [DividendPeriod]
     func fetchCurrentDividend() async -> DividendPeriod
-    func fetchTeam() async -> TeamSummary
 }

@@ -8,7 +8,6 @@ final class RewardsStore {
     var transactions: [PointTransaction] = []
     var dividends: [DividendPeriod] = []
     var currentDividend: DividendPeriod?
-    var team: TeamSummary?
     var referrals: [ReferralRecord] = []
     var isLoading = false
     var usesLiveData = false
@@ -30,7 +29,6 @@ final class RewardsStore {
         async let transactionsTask = liveService.fetchTransactions()
         async let dividendsTask = liveService.fetchDividends()
         async let currentDividendTask = liveService.fetchCurrentDividend()
-        async let teamTask = liveService.fetchTeam()
         async let referralsTask = liveService.fetchReferrals()
 
         profile = await profileTask
@@ -38,7 +36,6 @@ final class RewardsStore {
         transactions = await transactionsTask
         dividends = await dividendsTask
         currentDividend = await currentDividendTask
-        team = await teamTask
         referrals = await referralsTask
     }
 
@@ -53,7 +50,6 @@ final class RewardsStore {
         async let transactionsTask = mockService.fetchTransactions()
         async let dividendsTask = mockService.fetchDividends()
         async let currentDividendTask = mockService.fetchCurrentDividend()
-        async let teamTask = mockService.fetchTeam()
         async let referralsTask = mockService.fetchReferrals()
 
         let mockProfile = await profileTask
@@ -66,7 +62,6 @@ final class RewardsStore {
         transactions = await transactionsTask
         dividends = await dividendsTask
         currentDividend = await currentDividendTask
-        team = await teamTask
         referrals = await referralsTask
     }
 
@@ -81,7 +76,6 @@ final class RewardsStore {
         transactions = []
         dividends = []
         currentDividend = nil
-        team = nil
         referrals = []
         usesLiveData = false
         isGuestPreview = false
